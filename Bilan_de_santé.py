@@ -2,7 +2,7 @@
 AUDIT ET VALIDATION DES DONNÉES (BILAN DE SANTÉ)
 ===================================================
 
-Ce script vérifie la cohérence et l'intégrité des données avant ou après la migration. Il agit comme un contrôle qualité pour s'assurer que la base relationnelle est complète et sans erreurs.
+Ce script vérifie la cohérence et l'intégrité des données avant la migration. Il agit comme un contrôle qualité pour s'assurer que la base relationnelle est complète et sans erreurs.
 
 Étapes du diagnostic :
 VÉRIFICATION STRUCTURELLE : Contrôle de la présence effective des 4 tables piliers (DEPARTEMENT, UNITE, INFRACTION, ENREGISTRER).
