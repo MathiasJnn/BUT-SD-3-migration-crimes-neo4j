@@ -3,7 +3,7 @@ SÉCURITÉ ET MIGRATION DE DONNÉES - IMPORTATION SQLITE
 =====================================================
 
 CE SCRIPT AUTOMATISE L'IMPORTATION DE DONNÉES DE CRIMINALITÉ (FORMAT CSV) 
-DANS UNE BASE DE DONNÉES RELATIONNELLE SQLITE.
+DANS UNE BASE DE DONNÉES RELATIONNELLE SQLITE (DB Browser).
 
 Fonctionnalités principales :
 ----------------------------
@@ -19,7 +19,7 @@ Fonctionnalités principales :
 Prérequis :
 -----------
 - Bibliothèques standards : os, sqlite3, csv, re
-- Structure de base de données déjà existante ou prête à l'emploi.
+- Structure de base de données déjà existante ou prête à l'emploi (20 feuilles au format csv de l'Excel original)
 """
 
 import csv
