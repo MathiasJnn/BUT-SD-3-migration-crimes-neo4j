@@ -1,3 +1,18 @@
+#MIGRATION SQLITE VERS NEO4J : STRATÉGIE DE GRAPHÉISATION
+#==========================================================
+#Ce script transforme une base relationnelle classique en un modèle de graphe pour faciliter l'analyse des liens entre services de police/gendarmerie et types d'infractions.
+
+#Démarche technique :
+#SÉCURISATION DU SCHÉMA : Création de contraintes d'unicité (CREATE CONSTRAINT) pour garantir l'intégrité des nœuds et accélérer les futures recherches.
+
+#EXTRACTION & INSERTION DES ENTITÉS : Parcours des tables SQLite (DEPARTEMENT, INFRACTION, UNITE) pour créer les nœuds correspondants dans Neo4j via la clause MERGE.
+
+#LIAISON GÉOGRAPHIQUE : Création immédiate de la relation :SITUE_DANS connectant chaque unité à son département.
+
+#MIGRATION DES FAITS PAR BATCHS :
+#Transformation de la table de faits ENREGISTRER en relations :A_ENREGISTRE.
+#Optimisation Cypher : Utilisation de UNWIND pour traiter les données par paquets de 1000 lignes, réduisant drastiquement le temps d'exécution.
+
 pip install neo4j
 
 mport sqlite3
