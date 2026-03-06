@@ -1,0 +1,95 @@
+pip install neo4j
+
+mport sqlite3
+from neo4j import GraphDatabase
+import os
+
+# --- CONFIGURATION ---
+sqlite_path = r"C:\Users\mathj\OneDrive\Documents\Lyon 2\A.BUT 3\SAE Migration NoSql\sae_crimes.db"
+uri = "bolt://localhost:7687"
+user = "neo4j"
+password = "12345678"
+database_name = "modelegraphe" # Le nom que tu as choisi
+
+class Migrator:
+    def __init__(self, uri, user, password):
+        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+
+    def close(self):
+        self.driver.close()
+
+    def migrate(self, sqlite_conn):
+        with self.driver.session(database=database_name) as session:
+            cursor = sqlite_conn.cursor()
+
+            # 1. Création des contraintes d'unicité
+            print("Création des contraintes...")
+            session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (d:Departement) REQUIRE d.code IS UNIQUE")
+            session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (i:Infraction) REQUIRE i.code IS UNIQUE")
+            session.run("CREATE CONSTRAINT IF NOT EXISTS FOR (u:Unite) REQUIRE u.id_sql IS UNIQUE")
+
+            # 2. Import des Départements
+            print("Import des Départements...")
+            cursor.execute("SELECT Code_Dept, Nom_Dept FROM DEPARTEMENT")
+            for code, nom in cursor.fetchall():
+                session.run("MERGE (d:Departement {code: $code}) SET d.nom = $nom", code=code, nom=nom)
+
+            # 3. Import des Infractions
+            print("Import des Infractions...")
+            cursor.execute("SELECT Code_Index, Libelle_Index FROM INFRACTION")
+            for code, libelle in cursor.fetchall():
+                session.run("MERGE (i:Infraction {code: $code}) SET i.libelle = $libelle", code=code, libelle=libelle)
+
+            # 4. Import des Unités + Relation SITUE_DANS
+            print("Import des Unités et localisations...")
+            cursor.execute("SELECT Id_Unite, Nom_Unite, Service, Perimetre, Code_Dept FROM UNITE")
+            for row in cursor.fetchall():
+                session.run("""
+                    MERGE (u:Unite {id_sql: $id})
+                    SET u.nom = $nom, u.service = $service, u.perimetre = $perimetre
+                    WITH u
+                    MATCH (d:Departement {code: $dept_code})
+                    MERGE (u)-[:SITUE_DANS]->(d)
+                """, id=row[0], nom=row[1], service=row[2], perimetre=row[3], dept_code=row[4])
+
+            # 5. Import des Faits (RELATIONS)
+            print("Migration des faits (Relations)... Cela peut prendre 1 ou 2 minutes.")
+            cursor.execute("SELECT Id_Unite, Code_Index, Annee, Nombre_Faits FROM ENREGISTRER WHERE Nombre_Faits > 0")
+            
+            # Requête préparée pour le batching
+            cypher_faits = """
+                UNWIND $rows AS row
+                MATCH (u:Unite {id_sql: row.u_id})
+                MATCH (i:Infraction {code: row.i_code})
+                MERGE (u)-[r:A_ENREGISTRE {annee: row.annee}]->(i)
+                SET r.quantite = row.val
+            """
+
+            batch = []
+            count = 0
+            for row in cursor.fetchall():
+                batch.append({'u_id': row[0], 'i_code': row[1], 'annee': row[2], 'val': row[3]})
+                if len(batch) >= 1000:
+                    session.run(cypher_faits, rows=batch)
+                    count += len(batch)
+                    batch = []
+                    if count % 10000 == 0: print(f"  > {count} relations créées...")
+
+            # --- TRAITEMENT DU DERNIER BATCH (entre 1 et 999 lignes restantes) ---
+            if batch:
+                session.run(cypher_faits, rows=batch)
+                count += len(batch)
+                print(f"  > {count} relations créées au total.")
+
+# --- EXÉCUTION ---
+sql_conn = sqlite3.connect(sqlite_path)
+migrator = Migrator(uri, user, password)
+
+try:
+    migrator.migrate(sql_conn)
+    print("\n✅ MIGRATION RÉUSSIE !")
+except Exception as e:
+    print(f"\n❌ ERREUR : {e}")
+finally:
+    migrator.close()
+    sql_conn.close()
