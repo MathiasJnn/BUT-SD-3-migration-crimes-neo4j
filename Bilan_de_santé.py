@@ -1,3 +1,21 @@
+"""
+AUDIT ET VALIDATION DES DONNÉES (BILAN DE SANTÉ)
+===================================================
+
+Ce script vérifie la cohérence et l'intégrité des données avant ou après la migration. Il agit comme un contrôle qualité pour s'assurer que la base relationnelle est complète et sans erreurs.
+
+Étapes du diagnostic :
+VÉRIFICATION STRUCTURELLE : Contrôle de la présence effective des 4 tables piliers (DEPARTEMENT, UNITE, INFRACTION, ENREGISTRER).
+
+AUDIT VOLUMÉTRIQUE : Comptage exhaustif des lignes par table pour détecter d'éventuels manques lors de l'importation.
+
+CONTRÔLE D'UNICITÉ : Détection de doublons critiques sur le couple (Nom_Unite, Code_Dept) afin d'éviter les redondances dans le futur graphe.
+
+ANALYSE DE COHÉRENCE (ORPHELINS) : Identification des unités qui ne possèdent aucune statistique liée (vérification de l'intégrité référentielle).
+
+SYNTHÈSE TEMPORELLE : Inventaire des couples Année / Service pour valider la couverture des données importées.
+"""
+
 import sqlite3
 import os
 
