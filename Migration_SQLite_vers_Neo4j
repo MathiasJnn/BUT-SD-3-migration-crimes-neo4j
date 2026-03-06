@@ -5,11 +5,11 @@ from neo4j import GraphDatabase
 import os
 
 # --- CONFIGURATION ---
-sqlite_path = r"C:\Users\mathj\OneDrive\Documents\Lyon 2\A.BUT 3\SAE Migration NoSql\sae_crimes.db"
+sqlite_path = r"C:\Users\XXXX\XXXX\XXXX\XXXX\XXXX\SAE Migration NoSql\sae_crimes.db"
 uri = "bolt://localhost:7687"
 user = "neo4j"
-password = "12345678"
-database_name = "modelegraphe" # Le nom que tu as choisi
+password = "XXXXXXXX"
+database_name = "modelegraphe"
 
 class Migrator:
     def __init__(self, uri, user, password):
