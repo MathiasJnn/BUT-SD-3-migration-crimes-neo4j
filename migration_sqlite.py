@@ -28,7 +28,7 @@ import os
 import re
 
 # --- CONFIGURATION ---
-dossier_source = r"C:\Users\mathj\OneDrive\Documents\Lyon 2\A.BUT 3\SAE Migration NoSql"
+dossier_source = r"C:\Users\XXXX\XXXX\XXXX\XXXX\XXXXX\SAE Migration NoSql"
 db_path = os.path.join(dossier_source, "sae_crimes.db")
 
 def clean_int(text):
